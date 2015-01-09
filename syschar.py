@@ -11,7 +11,7 @@ maxlevel = 20
 class PlayerCharacter(object):
     #PlayerCharacter creates a character for you. Creation of explicit
     #characters is possible
-    def __init__(self, name='Player1', hp=100, exp=0, strength=0):
+    def __init__(self, name='Player1', hp=100, exp=0, strength=5):
         """
         Initializes the class. Takes in (name, hp, exp).
         Defaults are name = 'Player1', hp = 100, exp = 0
@@ -49,7 +49,7 @@ class PlayerCharacter(object):
 
     def getlevel(self):
          """getlevel will return a number which corresponds to the level"""
-         level = int(self.exp / 100)
+         level = int(self.exp / 100 + 1)
 
          #This part of the code will ensure that the maximum level will be
          #The maximum level, even if the exp goes above
@@ -135,15 +135,17 @@ class PlayerCharacter(object):
             # Do this to add hp when leveling up, as opposed to subtracting
             self.gethp(level_diff * 100 * -1)
             self.getmaxhp(level_diff * 100)
+            self.getstrength(1)
             # Gain hp when leveling up
             print "\nNew Status: "
             print self.getstatus()
-        else level_diff < 0:
+        elif level_diff < 0:
             print "\nYou have leveled down %d times..." % (-1 * level_diff)
             # You do not lose hp when you are leveling down...
             # except when your current hp > max hp
             # ie: 500/300
             self.getmaxhp(level_diff * 100 * -1)
+            self.getstrength(-1)
 
 
 class EnemyCharacter(object):
