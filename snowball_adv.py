@@ -6,7 +6,7 @@ import sys
 import castle
 import os
 
-os.system('cls')
+globalvalues.clearscreen()
 
 debug = 'I am stuck here'
 
@@ -27,7 +27,7 @@ def main():
         else:
             print "Please try again."
 def makechar():
-    os.system('cls')
+    globalvalues.clearscreen()
     print "Get ready to explore the strange world!"
     print "However, before you begin, I would like to know your name...."
 

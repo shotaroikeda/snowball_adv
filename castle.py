@@ -1,7 +1,8 @@
 import globalvalues
+import os
 
 def main():
-    globalvalues.clearup
+    globalvalues.clearscreen()
 
     print '\n\n\nYou have found yourself in front of a castle.'
     print 'There is a forest to your left, a castle in the front, and a brick wall to the right'
@@ -20,4 +21,3 @@ def main():
             print "left - go to forest\nfront - go to castle\nright - go to brick wall"
         elif '!status' in choice:
             print globalvalues.p1.getstatus()
-    

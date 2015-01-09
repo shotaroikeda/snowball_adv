@@ -17,3 +17,9 @@ global runcounter
 global cont_mssg
 cont_mssg = "Press Enter to Continue..."
 # Just a shortcut because I'm too lazy to type the message over and over
+
+def clearscreen():
+    try:
+        os.system('cls')
+    except NameError:
+        os.system('clear')
