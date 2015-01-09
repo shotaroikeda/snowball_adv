@@ -11,7 +11,6 @@ globalvalues.clearscreen()
 debug = 'I am stuck here'
 
 def main():
-    print "Hello!"
     print "1. Start"
     print "2. Quit"
 
@@ -44,6 +43,14 @@ def makechar():
     raw_input(globalvalues.cont_mssg)
 
     castle.main()
+
+def gameover_combat():
+    print "You have been defeated!"
+    print "Better luck next time!"
+
+    # Wait till user input to move on to main()
+    raw_input(globalvalues.cont_mssg)
+    main()
 
 
 

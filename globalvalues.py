@@ -18,6 +18,7 @@ global cont_mssg
 cont_mssg = "Press Enter to Continue..."
 # Just a shortcut because I'm too lazy to type the message over and over
 
+# Make sure you can clear the screen on all OSs
 def clearscreen():
     try:
         os.system('cls')

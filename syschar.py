@@ -115,6 +115,7 @@ class PlayerCharacter(object):
 
     def checkalive(self):
         """checkalive returns True if the character is alive. Otherwise False"""
+
         if self.gethp() > 0:
             return True
         else:
@@ -135,17 +136,19 @@ class PlayerCharacter(object):
             # Do this to add hp when leveling up, as opposed to subtracting
             self.gethp(level_diff * 100 * -1)
             self.getmaxhp(level_diff * 100)
-            self.getstrength(1)
+            self.getstrength(level_diff)
             # Gain hp when leveling up
             print "\nNew Status: "
             print self.getstatus()
         elif level_diff < 0:
-            print "\nYou have leveled down %d times..." % (-1 * level_diff)
+            print "\nYou have leveled down %d times..." % (level_diff)
             # You do not lose hp when you are leveling down...
             # except when your current hp > max hp
             # ie: 500/300
-            self.getmaxhp(level_diff * 100 * -1)
-            self.getstrength(-1)
+            self.getmaxhp(level_diff * 100)
+            self.getstrength(level_diff)
+            # just to check for correct hp value
+            self.gethp()
 
 
 class EnemyCharacter(object):
@@ -255,6 +258,7 @@ class EnemyCharacter(object):
                 int(self.maxhp), int(self.enemystr),
                 self.expgenerator()
                 ]
+                
 
     def checkalive(self):
         """

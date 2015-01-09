@@ -2,6 +2,7 @@
 
 import syschar
 import globalvalues
+import random
 
 class Combat(object):
     # Combat should flow like this:
@@ -53,6 +54,7 @@ class Combat(object):
             # because dead = dead, even if you defeat the enemy
             self.playerdefeated()
 
+        # Same deal here
         elif not globalvalues.ai.checkalive():
             self.enemydefeated()
 
@@ -62,6 +64,8 @@ class Combat(object):
         Passes values to dmgcalc then passes it to enemy's health
         """
         playerstr = globalvalues.p1.getstrength()
+        # see combatvaluetable.xlsx to see some possible values of
+        # self.playerrawdamage
         self.playerrawdamage = int((playerstr - 4) * 102 * 0.32)
 
         self.combat()
@@ -71,6 +75,7 @@ class Combat(object):
         """
         Figures out what to do when the player defends
         """
+        # Player is defending!
         self.playerdefend == True
 
         self.combat()
@@ -79,7 +84,27 @@ class Combat(object):
         """
         Figures out what to do when the player runs
         """
-        
+        # Calculating level difference. enemyinfo[0] returns level
+        p1level = globalvalues.p1.getlevel()
+        enemyinfo = globalvalues.ai.getstatus()
+        level_diff = enemyinfo[0] - p1level
+
+        # Generate the sequence used to determine if runnable
+        runcount_math = int(globalvalues.runcounter * 0.8 + 1)
+        maxrange = runcount_math + int(level_diff * 0.3 * roundcount_math)
+        runmap = range(0, maxrange)
+
+        # Use runmap to figure out if running away was successful
+        if level_diff < 0:
+            # You over power the opponent, automatically run away
+            globalvalues.runcounter += 1
+            print 'You have successfully run away!'
+        elif 0 == random.choice(runmap):
+            globalvalues.runcounter += 1
+            print 'You have successfully run away!'
+        else:
+            globalvalues.runcounter = 0
+            print 'You have failed to run away'
 
     def playerdefeated(self):
         """
