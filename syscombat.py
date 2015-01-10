@@ -110,15 +110,15 @@ class Combat(object):
         """
         Figures out what to do when the player is defeated
         """
-        pass
+        globalvalues.gameover_combat()
 
     # Some classes for enemyside
     def enemychoice(self):
-        pass
+        #
+        choice = random.randint(0, 10)
+
+
 
     def enemydefeated(self):
         pass
     def dmgcalc(self, attackerlvl, attackerstr, defenderlvl, defenderhp):
-
-
-    def fight(self, )

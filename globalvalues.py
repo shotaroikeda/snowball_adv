@@ -1,4 +1,5 @@
 import syschar
+import os
 
 global p1
 # p1 is an instance of syschar.PlayerCharacter.
@@ -24,3 +25,44 @@ def clearscreen():
         os.system('cls')
     except NameError:
         os.system('clear')
+def main():
+    print "1. Start"
+    print "2. Quit"
+
+    while True:
+        choice = raw_input("> ")
+
+        if "1" in choice:
+            makechar()
+        elif "2" in choice:
+            sys.exit()
+        elif "!option" in choice:
+            print ("1 - Begin the game!\n2 - Quit the game.")
+        else:
+            print "Please try again."
+def makechar():
+    clearscreen()
+    print "Get ready to explore the strange world!"
+    print "However, before you begin, I would like to know your name...."
+
+    name = raw_input("> ")
+
+    globalvalues.p1 = syschar.PlayerCharacter(name)
+    print globalvalues.p1.getstatus()
+    print "^ This is your status."
+    print "\nYou can obtain this at any time in the game if you type: "
+    print "\'!status\'"
+    print "while in game."
+    print "\nHave fun on your endevours and good luck!"
+
+    raw_input(globalvalues.cont_mssg)
+
+    castle.main()
+
+def gameover_combat():
+    print "You have been defeated!"
+    print "Better luck next time!"
+
+    # Wait till user input to move on to main()
+    raw_input(cont_mssg)
+    main()
