@@ -258,7 +258,7 @@ class EnemyCharacter(object):
                 int(self.maxhp), int(self.enemystr),
                 self.expgenerator()
                 ]
-                
+
 
     def checkalive(self):
         """
