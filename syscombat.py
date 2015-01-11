@@ -22,6 +22,9 @@ class Combat(object):
             #read enemy values...
             globalvalues.ai = syschar.BossCharacter(level, hp, hp, strength, exp)
 
+        # Start combat
+        self.playerchoice()
+
     # Some classes for Player side
     def playerchoice(self):
         # Prompt the player what they would like to do...
@@ -31,9 +34,16 @@ class Combat(object):
         print "\nWhat would you like to do?"
         print " 1. Attack"
         print " 2. Defend"
-        print " 3. Run"
+        print " 3. Run\n"
 
-        while globalvalues.p1.checkalive() and globalvalues.ai.checkalive():
+        self.runsuccess = False
+
+        while (globalvalues.p1.checkalive() and globalvalues.ai.checkalive()
+                and not self.runsuccess):
+            # Initialize self.playerdefend. Also serves as a reset after a turn
+            # of combat
+            self.playerdefend = False
+            self.runfail = False
 
             choice = raw_input("> ")
 
@@ -46,12 +56,10 @@ class Combat(object):
                 self.playerrun()
             elif '!status' in choice:
                 print globalvalues.p1.getstatus()
+                print globalvalues.ai.getstatusf()
             elif '!option' in choice:
-                print "1 - Attack the enemy\n2 - Defend against enemy attack"
-                print "3 - Attempt to run away"
-
-            # Reset the flags used for combat
-            self.reset()
+                print "\n1 - Attack the enemy\n2 - Defend against enemy attack"
+                print "3 - Attempt to run away\n"
 
         # Runs only when one of the hp's hit 0
         if not globalvalues.p1.checkalive():
@@ -62,6 +70,14 @@ class Combat(object):
         # Same deal here
         elif not globalvalues.ai.checkalive():
             self.enemydefeated()
+
+        # Run is successful
+        else:
+            None
+
+        # Combat ends....
+        raw_input(globalvalues.cont_mssg)
+        globalvalues.clearscreen()
 
     def playerrawdmg(self):
         """
@@ -75,9 +91,9 @@ class Combat(object):
         rawdmg = int((playerstr - 4) * 102 * 0.32)
 
         # Things that will deviate the amount of damage done.
-        level = globalvalues.p1.getlevel() - globalvalues.ai.getlevel()[0]
+        level = globalvalues.p1.getlevel() - globalvalues.ai.getstatus()[0]
         modvalue = float(1 + level * 0.05)
-        rngfactor = float(1 + random.randint(85, 105) / 100)
+        rngfactor = float(1 + float(random.randint(85, 105)) / 100)
 
         return int(rawdmg * modvalue * rngfactor)
 
@@ -92,20 +108,25 @@ class Combat(object):
 
         # Generate the sequence used to determine if runnable
         runcount_math = int(globalvalues.runcounter * 0.8 + 1)
-        maxrange = runcount_math + int(level_diff * 0.3 * roundcount_math)
+        maxrange = runcount_math + int(level_diff * 0.3 * runcount_math)
         runmap = range(0, maxrange)
 
         # Use runmap to figure out if running away was successful
         if level_diff < 0:
             # You over power the opponent, automatically run away
             globalvalues.runcounter += 1
-            print 'You have successfully run away!'
+            print breakline
+            print '\nYou have successfully run away!\n'
+            self.runsuccess = True
         elif 0 == random.choice(runmap):
             globalvalues.runcounter += 1
-            print 'You have successfully run away!'
+            print '\nYou have successfully run away!\n'
+            self.runsuccess = True
         else:
             globalvalues.runcounter = 0
-            print 'You have failed to run away'
+            print '\nYou have failed to run away!\n'
+            self.runfail = True
+            self.combat()
 
     def playerdefeated(self):
         """
@@ -122,6 +143,11 @@ class Combat(object):
         # when choice is 8, the enemy will do nothing
         # when choice is 9, the enemy will do a super move
 
+        #Create the Booleans first, they will also automatically 'reset' them
+        self.enemyattack = False
+        self.enemydefend = False
+        self.enemysuper = False
+
         if choice == 1 or choice == 2 or choice == 3:
             self.enemyattack = True
         elif choice == 4 or choice == 5 or choice == 6:
@@ -136,14 +162,14 @@ class Combat(object):
 
         enemystr = globalvalues.ai.getstatus()[3]
         # rngfactor will ensure that regular mobs won't absolutely crush you
-        rngfactor = float(random.randint(45, 65) / 100)
+        rngfactor = float(float(random.randint(45, 65)) / 100)
         level = (
                 globalvalues.p1.getlevel()
                 - globalvalues.ai.getstatus()[0]
                 )
         lvlfactor = float(1 - level * 0.05)
 
-        return int((enemystat - 4) * 102 * 0.32 * rngfactor * lvlfactor)
+        return int((enemystr) * 102 * 0.12 * rngfactor * lvlfactor)
 
     def combat(self):
         breakline = "-" * 86
@@ -158,58 +184,71 @@ class Combat(object):
             #Need another if statement to see if the player defended
             if self.playerdefend:
                 #Calculate how much damage is done if player defends
-                deffactor = float(random.randint(35, 55) / 100)
-                enemydmg = int(rawdmg * deffactor)
+                deffactor = float(float(random.randint(35, 55)) / 100)
+                enemydmg = int(enemyrawdmg * deffactor)
 
                 globalvalues.p1.gethp(enemydmg)
-                print "You have defended against the enemy attack!"
+                print "\nYou have defended against the enemy attack!"
                 print "You have taken %d damage. You would have taken %d." % (
                                                             enemydmg,
                                                             enemyrawdmg
                                                             )
-                print breakline
+            elif self.runfail:
+                print "You will get twice for failing to run.\n"
+                globalvalues.p1.gethp(enemyrawdmg)
+                print "You have taken %d damage." % (enemyrawdmg)
+                globalvalues.p1.gethp(enemyrawdmg)
+                print "You have taken %d damage." % (enemyrawdmg)
 
             else:
                 # Calculate damage normally
                 # Player does damage first
                 globalvalues.ai.gethp(playerrawdmg)
-                print "You have done %d damage." % (playerrawdmg)
+                print "\nYou have done %d damage." % (playerrawdmg)
 
                 # Enemy does damage
                 globalvalues.p1.gethp(enemyrawdmg)
                 print "You have taken %d damage." % (enemyrawdmg)
-                print breakline
         # If the enemy defends...
         elif self.enemydefend:
             # Need another if statement to check if everyone defended
             if self.playerdefend:
-                print "Both sides defended!!!\n"
-                print breakline
+                print "\nBoth sides defended!!!\n"
+            elif self.runfail:
+                print "Luckily, the enemy has defended nothing."
             else:
+                print "\nThe enemy defended."
                 # Calculate damage when the only enemy defends
-                deffactor = float(random.randint(45, 75) / 100)
+                deffactor = float(float(random.randint(45, 75)) / 100)
                 globalvalues.ai.gethp(playerrawdmg * deffactor)
-                print "You have done %d damage." % (playerrawdmg * deffactor)
+                print "\nYou have done %d damage." % (playerrawdmg * deffactor)
+                print "You could have done %d damage." % (playerrawdmg)
         # If you just got unlucky and the enemy feels like destroying you
         elif self.enemysuper:
-            print "The enemy's super move!"
-            superfactor = float(random.randint(150, 250) / 100)
+            print "\nThe enemy's super move!\n"
+            superfactor = float(float(random.randint(150, 250)) / 100)
             enemyrawdmg *= superfactor
             # Check if player is defending
             if self.playerdefend:
-                deffactor = float(random.randint(35, 55) / 100)
-                enemydmg = int(enemyrawdmg * defffactor)
+                deffactor = float(float(random.randint(35, 55)) / 100)
+                enemydmg = int(enemyrawdmg * deffactor)
                 # Taking damage from the enemy
                 globalvalues.p1.gethp(enemydmg)
-                print "You have defended against the enemy super attack!"
+                print "You have defended against the enemy super attack!\n"
                 print "You have taken %d damage. You would have taken %d." % (
                                                             enemydmg,
                                                             enemyrawdmg
                                                             )
-                print breakline
+            elif self.runfail:
+                print "It takes two strong swipes at you.\n"
+                # Gets attacked twice
+                globalvalues.p1.gethp(enemyrawdmg)
+                print "You have taken %d damage." % (enemyrawdmg)
+                globalvalues.p1.gethp(enemyrawdmg)
+                print "You have taken %d damage." % (enemyrawdmg)
             else:
                 # When the player does not defend...
-                print "You will take a lot of damage..."
+                print "\nYou will take a lot of damage...\n"
 
                 # Calculate damage normally
                 # Player does damage first
@@ -219,41 +258,38 @@ class Combat(object):
                 # Enemy does damage
                 globalvalues.p1.gethp(enemyrawdmg)
                 print "You have taken %d damage." % (enemyrawdmg)
-                print breakline
         # Enemy does nothing...
         else:
-            print "I guess the enemy is too lazy to attack us today!"
-            # Player attacks, no consequences
-            globalvalues.ai.gethp(playerrawdmg)
-            print "You have done %d damage." % (playerrawdmg)
-            print breakline
-
+            print "\nI guess the enemy is too lazy to attack us today!\n"
+            if self.playerdefend:
+                print "You defended against nothing!"
+            elif self.runfail:
+                print "Seeing you try to run, it has attacked you!\n"
+                globalvalues.p1.gethp(enemyrawdmg)
+                print "You have taken %d damage." % (enemyrawdmg)
+            else:
+                # Player attacks, no consequences
+                globalvalues.ai.gethp(playerrawdmg)
+                print "You have done %d damage." % (playerrawdmg)
 
         # After combat has finished print both hp and then add a breakline
+        print breakline
+        print breakline
         print "\n\tYour HP: %d/%d\n" % (
                                         globalvalues.p1.gethp(),
                                         globalvalues.p1.getmaxhp()
                                         )
-        enemystats = globalvalues.ai.getstatus()
+        enemystatus = globalvalues.ai.getstatus()
         print "\n\tEnemy HP: %d/%d\n" % (
                                         enemystatus[1],
                                         enemystatus[2]
                                         )
         print breakline
-
-    def reset(self):
-        """Resets all the flags associated with player and enemy actions"""
-        self.enemyattack = False
-        self.enemydefend = False
-        self.enemysuper = False
-
-        self.playerdefend = False
+        print breakline
 
     def enemydefeated(self):
         """Gives player exp"""
-        print "-" * 86
-        print "You have defeated the enemy!"
+        print "\nYou have defeated the enemy!\n"
         exp = globalvalues.ai.getstatus()[4]
+        print "You got %d Experience!\n" % (exp)
         globalvalues.p1.addexp(exp)
-
-        raw_input(globalvalues.cont_mssg)

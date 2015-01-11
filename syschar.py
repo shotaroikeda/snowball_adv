@@ -92,7 +92,11 @@ class PlayerCharacter(object):
         # Prevents hp from begin unreasonable like 500/300
         if self.currenthp > self.maxhp:
             self.currenthp = self.maxhp
-        return int(self.currenthp)
+        #Prevent negative hps
+        elif self.currenthp < 0:
+            return 0
+        else:
+            return int(self.currenthp)
 
     def getstrength(self, addstr=0):
         """
@@ -171,16 +175,19 @@ class EnemyCharacter(object):
         """returns an integer, representing the enemy level"""
         # Prevent negative levels from occuring!
         if self.playerlevel <= 1:
-            self.enemylevel = int(random.randint(self.playerlevel + 1))
+            self.enemylevel = int(random.randint(
+                                                self.playerlevel,
+                                                self.playerlevel + 1
+                                                ))
 
         elif self.playerlevel == maxlevel:
             self.enemylevel = int(random.randint(
-                                            self.playerlevel - 2,
+                                            self.playerlevel - 1,
                                             self.playerlevel + 1
                                             ))
         else:
             self.enemylevel = int(random.randint(
-                                            self.playerlevel - 2,
+                                            self.playerlevel - 1,
                                             self.playerlevel + 2
                                             ))
         return self.enemylevel
@@ -202,18 +209,22 @@ class EnemyCharacter(object):
         """returns an integer, representing the enemy's strength"""
         #Limitations to how overpowered the enemy character can be...
         if self.maxhp >= self.playerlevel * 100:
-            maxstr = int(self.playerlevel + 6)
-            minstr = int(self.playerlevel + 1)
+            maxstr = int(self.playerlevel + 3)
+            minstr = int(self.playerlevel)
         elif self.maxhp < self.playerlevel * 100:
-            maxstr = int(self.playerlevel + 10)
-            minstr = int(self.playerlevel + 5)
+            maxstr = int(self.playerlevel + 4)
+            minstr = int(self.playerlevel + 2)
         self.enemystr = int(random.randint(minstr, maxstr))
         return self.enemystr
 
     def gethp(self, dmg=0):
         """Same as the one in PlayerCharacter."""
         self.currenthp -= dmg
-        return int(self.currenthp)
+        # Prevent returning negative HP
+        if self.currenthp < 0:
+            return 0
+        else:
+            return int(self.currenthp)
 
     def getdifficulty(self):
         """
@@ -222,7 +233,7 @@ class EnemyCharacter(object):
         """
         levelexp = self.enemylevel * 100
         hpexp = self.maxhp
-        strexp = (self.enemystr - 4) * 100
+        strexp = (self.enemystr - 1) * 80
         #Take the average of all of them...
         #hopefully returns a resonable amt of exp accurate to player
         return int(levelexp/3 + hpexp/3 + strexp/3)
@@ -240,12 +251,12 @@ class EnemyCharacter(object):
         if playerexp > enemyexp:
             #should get smaller amount of exp, fighting an easier monster
             #factor in how strong the enemy is in calcuations
-            return int(enemyexp * 0.35 / self.enemylevel)
+            return int(enemyexp * 0.60 / self.enemylevel)
 
         elif playerexp <= enemyexp:
             #should get larger amount of exp, fighting stronger monster
             #factor in how strong the enemy is to the calculations
-            returnedexp = (enemyexp * 0.8 - playerexp * 0.7) * 0.4
+            returnedexp = (enemyexp - playerexp * 0.6)
             return int(returnedexp)
 
     def getstatus(self):
@@ -258,7 +269,15 @@ class EnemyCharacter(object):
                 int(self.maxhp), int(self.enemystr),
                 self.expgenerator()
                 ]
-
+    def getstatusf(self):
+        """
+        return the status of the monster but formatted.
+        """
+        return str(
+            "\nEnemy Level: %d\n HP: %d/%d\n Str: %d\n EXP Gained: %d\n"
+        % (self.getstatus()[0], self.getstatus()[1],
+        self.getstatus()[2], self.getstatus()[3], self.getstatus()[4]
+            ))
 
     def checkalive(self):
         """
